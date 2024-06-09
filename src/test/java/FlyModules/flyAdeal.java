@@ -40,7 +40,7 @@ public class flyAdeal extends FlyAdealCacheFlow  {
 
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(25)); // Set the maximum wait time to 60 seconds
 		boolean isPageLoaded = false;
-		int maxAttempts = 4;
+		int maxAttempts = 1;
 		int attempt = 1;
 
 		while (!isPageLoaded && attempt <= maxAttempts) {
@@ -51,7 +51,7 @@ public class flyAdeal extends FlyAdealCacheFlow  {
 		   
 
 		        // Refresh the page
-		        driver.get(flyAdealApiUrl);
+		        //driver.get(flyAdealApiUrl);
 		        Thread.sleep(4000);
 		        System.out.println("Cookies deleted. Page refreshed.");
 		    }
