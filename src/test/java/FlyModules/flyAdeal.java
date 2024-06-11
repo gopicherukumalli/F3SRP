@@ -38,21 +38,36 @@ public class flyAdeal extends FlyAdealCacheFlow  {
     public static void FlightDetails2(WebDriver driver, Database PnrDetails) throws Exception {
         String date;
 
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(25)); // Set the maximum wait time to 60 seconds
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(19)); // Set the maximum wait time to 60 seconds
 		boolean isPageLoaded = false;
-		int maxAttempts = 2;
+		int maxAttempts = 3;
 		int attempt = 1;
 
 		while (!isPageLoaded && attempt <= maxAttempts) {
 		    try {
 		        // Wait for the page to load completely
 		        isPageLoaded = wait.until(ExpectedConditions.urlContains("https://www.flyadeal.com/en/select-flight"));
-		    } catch (Exception e) {
-		   
+		    }  catch (Exception e) {
+		        // Timeout occurred, handle the situation
+		        System.out.println("Page didn't load within 60 seconds on attempt " + attempt + ". Clearing cookies...");
+
+		        // Clear cookies
+		        driver.get("chrome://settings/clearBrowserData");
+				try {
+		            Thread.sleep(1000);
+		        } catch (Exception e1) {
+		            e.printStackTrace();
+		        }
+				JavascriptExecutor js = (JavascriptExecutor) driver;
+		        //get clear cache button
+		        WebElement clearBtn = (WebElement) js.executeScript("return document.querySelector(\"body > settings-ui\").shadowRoot.querySelector(\"#main\").shadowRoot.querySelector(\"settings-basic-page\").shadowRoot.querySelector(\"#basicPage > settings-section:nth-child(9) > settings-privacy-page\").shadowRoot.querySelector(\"settings-clear-browsing-data-dialog\").shadowRoot.querySelector(\"#clearBrowsingDataConfirm\")");
+		        //Click
+		        clearBtn.click();
+		        Thread.sleep(1000);
 
 		        // Refresh the page
 		        driver.get(flyAdealApiUrl);
-		        Thread.sleep(2000);
+		        Thread.sleep(4000);
 		        System.out.println("Cookies deleted. Page refreshed.");
 		    }
 
@@ -61,9 +76,8 @@ public class flyAdeal extends FlyAdealCacheFlow  {
         
         try {
             
-            //PageUtils.scrollUp(driver);
             driver.findElement(By.cssSelector("div.select_date_previous")).click();
-            Thread.sleep(2000);
+            Thread.sleep(1000);
 
             for (int weekOffset = 0; weekOffset < 5; weekOffset++) {
                 for (int dayOffset = 1; dayOffset <= 7; dayOffset++) {
@@ -77,7 +91,7 @@ public class flyAdeal extends FlyAdealCacheFlow  {
                     //System.out.println("Processing for date: " + Depdate);
 
                     driver.findElement(By.xpath("//app-trip-one-way/div/div[1]/div[2]/div[" + dayOffset + "]")).click();
-                    Thread.sleep(2000);
+                    Thread.sleep(1000);
                     String DepDate=driver.findElement(By.xpath("//app-journey-one-way/section/app-trip-one-way/div/div[1]/div[2]/div["+dayOffset+"]/div/strong")).getText().replace("month.", "");
                     System.out.println(DepDate);
                     String[] dateParts = DepDate.split("\\W+");
@@ -104,16 +118,11 @@ public class flyAdeal extends FlyAdealCacheFlow  {
                     else {
                     	Depdate=Departdate;
                     }
-                    //System.out.println("System Changed Date: " + Depdate);
-
                     String websiteDate = driver.findElement(By.xpath("//span[contains(text(),'Passenger')]")).getText();
                     date = websiteDate.split("\\|")[0].trim();
-                    //System.out.println("Date from the web page: " + date);
-
                     Currency = driver.findElement(By.cssSelector("span.currency.ng-star-inserted")).getText().replaceAll(" ", "");
-                    //System.out.println(Currency);
                     
-                    String F3Flights=driver.findElement(By.cssSelector("div.flight_details_wrap")).getText().replaceAll(" ", "");
+                    String F3Flights=driver.findElement(By.cssSelector(".flight_details_wrap, .no-flight-available-wrap")).getText().replaceAll(" ", "");
                     //System.out.println(F3Flights);
                     
                     if (F3Flights.equals("Noflightsavailable")) {
@@ -145,7 +154,7 @@ public class flyAdeal extends FlyAdealCacheFlow  {
                     // If it's the last iteration of the inner loop and not the last week, click on the "Next" button
                     if (dayOffset == 7 && weekOffset < 4) {
                         driver.findElement(By.cssSelector("div.select-date-range.next-date-range")).click();
-                        Thread.sleep(2000);
+                        Thread.sleep(1000);
                     }
                     
                 }
